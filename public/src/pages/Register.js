@@ -1,7 +1,11 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 import styled from 'styled-components'
-import {Link} from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 import Logo from '../assets/logo.png'
+import {ToastContainer, toast} from 'react-toastify'
+import "react-toastify/dist/ReactToastify.css"
+import axios from 'axios'
+import {registerRoute} from '../utils/APIRoutes.js'
 
 const FormContainer = styled.div`
   height: 100vh;
@@ -71,11 +75,71 @@ const FormContainer = styled.div`
 `
 
 const Register = () => {
-  const handleSubmit = (event) => {
+  const navigate = useNavigate()
+  const [values, setValue] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirm: ""
+  })
+  const handleSubmit = async (event) => {
     event.preventDefault()
-    alert("form")
+    if(handeValidation()) {
+      const {password, username, email} = values
+      const {data} = await axios.post(registerRoute, {
+        username,
+        email,
+        password
+      })
+      if(data.status === false) {
+        toast.error(data.msg, toastOptions)
+      }
+      if(data.status === true) {
+        localStorage.setItem('user1', JSON.stringify(data.user))
+        alert("Hello")
+        navigate('/')
+      }
+    }
   }
-  const handleChange = (event) => {}
+
+  const toastOptions = {
+    position: 'bottom-right',
+    autoClose: 3000,
+    pauseOnHover: true,
+    draggable: true,
+    theme: 'dark',
+  }
+
+  useEffect(() => {
+    if(localStorage.getItem('user1')) {
+      navigate('/')
+    }
+  },[])
+
+  const handeValidation = () => {
+    const {password, confirmPassword, username, email} = values
+    if(password !== confirmPassword) {
+      toast.error('Password and confirmed password should be the same!', toastOptions)
+      return false
+    } else if (username.length < 3) {
+      toast.error("Too short user name.", toastOptions)
+      return false
+    } else if (password.length < 8) {
+      toast.error("Password should be more than 8 characters.", toastOptions)
+      return false
+    } else if (email.length === 0) {
+      toast.error("Email is required.", toastOptions)
+      return false
+    } else if (confirmPassword.length === 0) {
+      toast.error("Confirm a password please.", toastOptions)
+      return false
+    }
+    return true
+  }
+
+  const handleChange = (event) => {
+    setValue({...values, [event.target.name]: event.target.value})
+  }
   return (
     <>
       <FormContainer>
@@ -108,6 +172,7 @@ const Register = () => {
             <span>Already have an account? - <Link to='/login'>Login</Link></span>
         </form>
       </FormContainer>
+      <ToastContainer/>
     </>
   )
 }
