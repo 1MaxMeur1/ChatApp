@@ -1,4 +1,6 @@
 import React, {useState, useEffect} from 'react'
+import Contacts from '../components/Contacts'
+import Welcome from '../components/Welcome'
 import styled from 'styled-components'
 import axios from 'axios'
 import {useNavigate} from 'react-router-dom'
@@ -28,7 +30,12 @@ const Container = styled.div`
 const Chat = () => {
   const [contacts, setContacts] = useState([])
   const [currentUser, setCurrentUser] = useState(undefined)
+  const [currentChat, setCurrentChat] = useState(undefined)
   const navigate = useNavigate()
+
+  const handleChatChange = (chat) => {
+    setCurrentChat(chat)
+  }
 
   const isLoggedIn = async () => {
     if(!localStorage.getItem('user1')) {
@@ -58,7 +65,8 @@ const Chat = () => {
     <>
       <Container>
         <div className="container">
-        
+        <Contacts contacts={contacts} currentUser={currentUser} changeChat={handleChatChange}/>
+        <Welcome currentUser={currentUser}/>
         </div>
       </Container>
     </>
